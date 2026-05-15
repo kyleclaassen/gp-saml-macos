@@ -1,0 +1,28 @@
+[project]
+name = "gp-saml-macos"
+version = "0.1.0"
+description = "Cross-platform GlobalProtect SAML authenticator using Selenium for macOS and Linux"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests>=2.33.1",
+    "selenium>=4.41.0",
+]
+authors = [
+    {name = "2gn"}
+]
+license = {text = "GPL-3.0-or-later"}
+keywords = ["vpn", "globalprotect", "saml", "openconnect", "selenium", "authentication"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Networking",
+]
+
+[project.scripts]
+gp-saml-selenium = "gp_saml_selenium:main"
