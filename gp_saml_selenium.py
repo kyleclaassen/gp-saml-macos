@@ -18,8 +18,6 @@ from html.parser import HTMLParser
 
 import requests
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -40,7 +38,6 @@ class GPSAMLAuthenticator:
     """GlobalProtect SAML Authenticator using Selenium."""
     
     COOKIE_FIELDS = ('prelogin-cookie', 'portal-userauthcookie')
-    USER_AGENT = 'PAN GlobalProtect'
     
     def __init__(self, args):
         self.args = args
@@ -80,7 +77,7 @@ class GPSAMLAuthenticator:
         self.log(f"Querying prelogin endpoint: {endpoint}")
         
         session = requests.Session()
-        session.headers['User-Agent'] = self.USER_AGENT
+        session.headers['User-Agent'] = self.args.user_agent
         
         try:
             response = session.post(endpoint, verify=self.verify, data=data)
@@ -129,36 +126,30 @@ class GPSAMLAuthenticator:
         return method, request_data
     
     def setup_driver(self):
-        """Setup Selenium WebDriver with Chrome."""
-        chrome_options = Options()
+        """Setup Selenium WebDriver with Firefox."""
+        options = webdriver.FirefoxOptions()
         
         # Headless mode if requested
         if self.args.headless:
-            chrome_options.add_argument('--headless=new')
+            options.add_argument('--headless')
         
-        # Common options for stability
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument('--disable-gpu')
-        chrome_options.add_argument('--window-size=1024,768')
-        chrome_options.add_argument(f'user-agent={self.USER_AGENT}')
+        options.set_preference("general.useragent.override", self.args.user_agent)
         
         # Disable certificate verification if requested
         if not self.verify:
-            chrome_options.add_argument('--ignore-certificate-errors')
-            chrome_options.add_argument('--ignore-ssl-errors')
+            options.accept_insecure_certs = True
         
-        # Try to find ChromeDriver automatically
+        # Try to find driver automatically
         try:
-            self.log("Initializing Chrome WebDriver...")
-            self.driver = webdriver.Chrome(options=chrome_options)
+            self.log("Initializing WebDriver...")
+            self.driver = webdriver.Firefox(options=options)
             self.driver.set_page_load_timeout(30)
         except WebDriverException as e:
             self.error(
-                f"Failed to initialize Chrome WebDriver: {e}\n"
-                f"Please install ChromeDriver: https://chromedriver.chromium.org/\n"
-                f"macOS: brew install chromedriver\n"
-                f"Linux: sudo apt install chromium-chromedriver or download manually"
+                f"Failed to initialize Gecko WebDriver: {e}\n"
+                f"Please install GeckoDriver: https://github.com/mozilla/geckodriver/\n"
+                f"macOS: brew install geckodriver\n"
+                f"Linux: sudo apt install firefox-geckodriver or download manually"
             )
     
     def perform_saml_auth(self, method, request_data):
@@ -309,6 +300,8 @@ class GPSAMLAuthenticator:
         
         if self.args.no_proxy:
             cmd.append('--no-proxy')
+
+        cmd.append(f'--useragent={self.args.user_agent}')
         
         # Use system vpnc-script if available (handles macOS DNS via scutil properly).
         # --script-tun is intentionally NOT used: that flag tells openconnect to
@@ -474,8 +467,8 @@ Examples:
     parser.add_argument(
         '--clientos',
         choices=['Linux', 'Mac', 'Windows'],
-        default='Windows',
-        help='OS identifier to send to server (default: Windows)'
+        default='Mac',
+        help='OS identifier to send to server (default: %(default)r)'
     )
     parser.add_argument(
         '--no-verify',
@@ -488,6 +481,12 @@ Examples:
         '--no-proxy',
         action='store_true',
         help='Disable system proxy for VPN connection'
+    )
+    parser.add_argument(
+        '--user-agent',
+        '--useragent',
+        default='PAN GlobalProtect',
+        help='Use the provided string as the HTTP User-Agent header (default is %(default)r, as used by OpenConnect)'
     )
     
     # Execution mode
