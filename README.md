@@ -5,7 +5,7 @@ Cross-platform Python tool for authenticating to GlobalProtect VPN servers that 
 ## Features
 
 - ✅ **Cross-platform**: Works on macOS and Linux
-- ✅ **Selenium-based**: Uses Chrome/Chromium for reliable browser automation
+- ✅ **Selenium-based**: Uses Firefox for reliable browser automation
 - ✅ **Headless mode**: Can run without GUI for automation
 - ✅ **Auto-connect**: Automatically calls OpenConnect after authentication
 - ✅ **Flexible**: Supports both portal and gateway authentication
@@ -17,17 +17,17 @@ Cross-platform Python tool for authenticating to GlobalProtect VPN servers that 
 **macOS:**
 ```bash
 brew install openconnect
-brew install chromedriver
+brew install geckodriver
 ```
 
 **Ubuntu/Debian:**
 ```bash
-sudo apt install openconnect chromium-chromedriver
+sudo apt install openconnect firefox-geckodriver
 ```
 
 **Fedora:**
 ```bash
-sudo dnf install openconnect chromium-chromedriver
+sudo dnf install openconnect firefox-geckodriver
 ```
 
 ### Python Dependencies
@@ -90,7 +90,7 @@ python3 gp_saml_selenium.py --gateway vpn.company.com -vv --sudo
 ## How It Works
 
 1. **Prelogin Query**: Contacts the GlobalProtect server to discover SAML configuration
-2. **Browser Launch**: Opens Chrome/Chromium with Selenium to handle SAML authentication
+2. **Browser Launch**: Opens Firefox with Selenium to handle SAML authentication
 3. **User Authentication**: You complete the SSO login (Okta, Microsoft, etc.) in the browser
 4. **Credential Extraction**: Extracts SAML cookies from HTML comments in the response
 5. **VPN Connection**: Automatically calls OpenConnect with the authentication cookie
@@ -106,7 +106,7 @@ python3 gp_saml_selenium.py --gateway vpn.company.com -vv --sudo
                               ▼                         ▼
                       ┌──────────────┐          ┌──────────────┐
                       │   Selenium   │          │ SAML Identity│
-                      │   Chrome     │◀────────▶│   Provider   │
+                      │   Firefox    │◀────────▶│   Provider   │
                       │  WebDriver   │          │ (Okta, etc.) │
                       └──────────────┘          └──────────────┘
                               │
@@ -119,22 +119,22 @@ python3 gp_saml_selenium.py --gateway vpn.company.com -vv --sudo
 
 ## Troubleshooting
 
-### ChromeDriver not found
+### Driver not found
 
 **macOS:**
 ```bash
-brew install chromedriver
+brew install geckodriver
 # If security warning appears:
-xattr -d com.apple.quarantine $(which chromedriver)
+xattr -d com.apple.quarantine $(which geckodriver)
 ```
 
 **Linux:**
 ```bash
 # Ubuntu/Debian
-sudo apt install chromium-chromedriver
+sudo apt install firefox-geckodriver
 
 # Or download manually from:
-# https://chromedriver.chromium.org/
+# https://github.com/mozilla/geckodriver/
 ```
 
 ### OpenConnect not found
@@ -180,11 +180,11 @@ Some GlobalProtect servers may not embed SAML data in HTML comments. This tool r
 
 | Feature | gp-saml-gui | gp_saml_selenium.py |
 |---------|-------------|---------------------|
-| Browser Engine | WebKit2-GTK / pywebview | Selenium + Chrome |
+| Browser Engine | WebKit2-GTK / pywebview | Selenium + Firefox |
 | macOS Support | Limited (requires pywebview) | Native |
 | Linux Support | Yes (WebKit2-GTK) | Yes |
 | Headless Mode | No | Yes |
-| Dependencies | GTK3, WebKit2 | Chrome/Chromium |
+| Dependencies | GTK3, WebKit2 | Firefox |
 | Installation | Complex on macOS | Simple (pip + brew/apt) |
 
 ## License
